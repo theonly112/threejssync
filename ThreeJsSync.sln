@@ -1,0 +1,32 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Core", "src\ThreeJsSync.Core\ThreeJsSync.Core.csproj", "{25C82167-BD16-42D4-A5BA-90EF38A48E85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Host", "src\ThreeJsSync.Host\ThreeJsSync.Host.csproj", "{1F11FD58-D65B-4B62-AE67-D0319E440B10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Core.Tests", "tests\ThreeJsSync.Core.Tests\ThreeJsSync.Core.Tests.csproj", "{36149553-D270-46F0-AD7A-D8F2E8AB3816}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25C82167-BD16-42D4-A5BA-90EF38A48E85}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{25C82167-BD16-42D4-A5BA-90EF38A48E85}.Debug|x64.Build.0 = Debug|Any CPU
+		{25C82167-BD16-42D4-A5BA-90EF38A48E85}.Release|x64.ActiveCfg = Release|Any CPU
+		{25C82167-BD16-42D4-A5BA-90EF38A48E85}.Release|x64.Build.0 = Release|Any CPU
+		{1F11FD58-D65B-4B62-AE67-D0319E440B10}.Debug|x64.ActiveCfg = Debug|x64
+		{1F11FD58-D65B-4B62-AE67-D0319E440B10}.Debug|x64.Build.0 = Debug|x64
+		{1F11FD58-D65B-4B62-AE67-D0319E440B10}.Release|x64.ActiveCfg = Release|x64
+		{1F11FD58-D65B-4B62-AE67-D0319E440B10}.Release|x64.Build.0 = Release|x64
+		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Debug|x64.Build.0 = Debug|Any CPU
+		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Release|x64.ActiveCfg = Release|Any CPU
+		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+

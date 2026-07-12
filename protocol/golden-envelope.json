@@ -1,0 +1,1 @@
+{"protocolVersion":1,"kind":"patch","objectId":"demo-cube","origin":"browser","sequence":42,"correlationId":"golden","payload":{"changes":[{"key":"position","value":{"x":1.25,"y":-2,"z":3.5},"stamp":{"counter":9,"origin":"browser"}},{"key":"material.color","value":"#4f8cff","stamp":{"counter":10,"origin":"browser"}}]}}

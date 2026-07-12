@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://threejssync.local/schema/protocol-v1.json",
+  "title": "ThreeJsSync envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "kind", "objectId", "origin", "sequence", "payload"],
+  "properties": {
+    "protocolVersion": { "const": 1 },
+    "kind": { "enum": ["ready", "snapshot", "patch", "ack", "ping", "pong", "error"] },
+    "objectId": { "const": "demo-cube" },
+    "origin": { "enum": ["host", "browser"] },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "correlationId": { "type": "string", "maxLength": 128 },
+    "payload": {}
+  },
+  "$defs": {
+    "stamp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["counter", "origin"],
+      "properties": {
+        "counter": { "type": "integer", "minimum": 0 },
+        "origin": { "enum": ["host", "browser"] }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "value", "stamp"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1, "maxLength": 137 },
+        "value": {},
+        "stamp": { "$ref": "#/$defs/stamp" }
+      }
+    }
+  }
+}
+
