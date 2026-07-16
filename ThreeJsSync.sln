@@ -5,9 +5,15 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Core", "src\ThreeJsSync.Core\ThreeJsSync.Core.csproj", "{25C82167-BD16-42D4-A5BA-90EF38A48E85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Host", "src\ThreeJsSync.Host\ThreeJsSync.Host.csproj", "{1F11FD58-D65B-4B62-AE67-D0319E440B10}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Host.Shared", "src\ThreeJsSync.Host\ThreeJsSync.Host.csproj", "{1F11FD58-D65B-4B62-AE67-D0319E440B10}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Core.Tests", "tests\ThreeJsSync.Core.Tests\ThreeJsSync.Core.Tests.csproj", "{36149553-D270-46F0-AD7A-D8F2E8AB3816}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.PostMessage", "src\ThreeJsSync.PostMessage\ThreeJsSync.PostMessage.csproj", "{B41596C1-1E99-4871-9D0F-1AECA617BEF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.BoundCallback", "src\ThreeJsSync.BoundCallback\ThreeJsSync.BoundCallback.csproj", "{56AB7361-6CB6-4C79-815B-5B1A438C7D7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeJsSync.Fetch", "src\ThreeJsSync.Fetch\ThreeJsSync.Fetch.csproj", "{3C63D02B-29AF-4E71-A108-B7F20A53BB99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +33,17 @@ Global
 		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Debug|x64.Build.0 = Debug|Any CPU
 		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Release|x64.ActiveCfg = Release|Any CPU
 		{36149553-D270-46F0-AD7A-D8F2E8AB3816}.Release|x64.Build.0 = Release|Any CPU
+		{B41596C1-1E99-4871-9D0F-1AECA617BEF1}.Debug|x64.ActiveCfg = Debug|x64
+		{B41596C1-1E99-4871-9D0F-1AECA617BEF1}.Debug|x64.Build.0 = Debug|x64
+		{B41596C1-1E99-4871-9D0F-1AECA617BEF1}.Release|x64.ActiveCfg = Release|x64
+		{B41596C1-1E99-4871-9D0F-1AECA617BEF1}.Release|x64.Build.0 = Release|x64
+		{56AB7361-6CB6-4C79-815B-5B1A438C7D7A}.Debug|x64.ActiveCfg = Debug|x64
+		{56AB7361-6CB6-4C79-815B-5B1A438C7D7A}.Debug|x64.Build.0 = Debug|x64
+		{56AB7361-6CB6-4C79-815B-5B1A438C7D7A}.Release|x64.ActiveCfg = Release|x64
+		{56AB7361-6CB6-4C79-815B-5B1A438C7D7A}.Release|x64.Build.0 = Release|x64
+		{3C63D02B-29AF-4E71-A108-B7F20A53BB99}.Debug|x64.ActiveCfg = Debug|x64
+		{3C63D02B-29AF-4E71-A108-B7F20A53BB99}.Debug|x64.Build.0 = Debug|x64
+		{3C63D02B-29AF-4E71-A108-B7F20A53BB99}.Release|x64.ActiveCfg = Release|x64
+		{3C63D02B-29AF-4E71-A108-B7F20A53BB99}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal
-

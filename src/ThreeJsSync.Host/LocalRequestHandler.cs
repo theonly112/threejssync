@@ -8,7 +8,7 @@ using ThreeJsSync.Core;
 
 namespace ThreeJsSync.Host
 {
-    internal sealed class LocalRequestHandler : RequestHandler
+    public sealed class LocalRequestHandler : RequestHandler
     {
         public const string Origin = "https://threejssync.local";
         private readonly string _webRoot;

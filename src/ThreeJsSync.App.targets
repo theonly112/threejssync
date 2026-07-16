@@ -1,0 +1,7 @@
+<Project>
+  <Target Name="CopyWebAssets" AfterTargets="Build">
+    <ItemGroup><WebAssets Include="$(MSBuildThisFileDirectory)..\web\dist\**\*" /></ItemGroup>
+    <Copy SourceFiles="@(WebAssets)" DestinationFiles="@(WebAssets->'$(OutDir)Web\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
+

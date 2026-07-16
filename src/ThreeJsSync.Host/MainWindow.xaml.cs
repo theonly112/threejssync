@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,40 +17,39 @@ namespace ThreeJsSync.Host
     {
         private readonly SyncedObjectState _state = new SyncedObjectState();
         private readonly SyncEngine _engine;
-        private readonly BoundHostBridge _boundBridge = new BoundHostBridge();
+        private readonly ITransportModule _module;
         private readonly DispatcherTimer _flushTimer;
-        private LocalRequestHandler _requestHandler;
+        private readonly LocalRequestHandler _requestHandler;
         private ISyncTransport _transport;
-        private CancellationTokenSource _transportCancellation = new CancellationTokenSource();
-        private bool _windowLoaded;
+        private readonly CancellationTokenSource _transportCancellation = new CancellationTokenSource();
         private bool _browserReady;
         private bool _metadataInitialized;
         private bool _updatingMetadata;
 
-        public MainWindow()
+        public MainWindow(ITransportModule module)
         {
+            _module = module ?? throw new ArgumentNullException(nameof(module));
             _engine = new SyncEngine("host", _state);
             InitializeComponent();
             DataContext = _state;
+            Title = module.DisplayName + " — Three.js ↔ .NET synchronization";
+            ApproachNameText.Text = module.DisplayName;
+            ApproachDescriptionText.Text = module.Description;
 
             var webRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Web");
             _requestHandler = new LocalRequestHandler(webRoot);
             Browser.RequestHandler = _requestHandler;
-            Browser.JavascriptObjectRepository.Settings.JavascriptBindingApiEnabled = true;
-            Browser.JavascriptObjectRepository.Settings.JavascriptBindingApiAllowOrigins = new[] { LocalRequestHandler.Origin };
+            Browser.BrowserSettings.WindowlessFrameRate = 60;
             Browser.ConsoleMessage += (_, e) => _ = Dispatcher.BeginInvoke(new Action(() => ConnectionText.Text = $"Browser console ({e.Line}): {e.Message}"));
             Browser.LoadError += (_, e) => _ = Dispatcher.BeginInvoke(new Action(() => ConnectionText.Text = $"Load error {e.ErrorCode}: {e.ErrorText}"));
             Browser.LoadingStateChanged += async (_, e) =>
             {
                 if (e.IsLoading) return;
                 await Task.Delay(500);
-                var result = await Browser.EvaluateScriptAsync("(document.getElementById('status')?.textContent || '') + '|' + (typeof CefSharp === 'undefined' ? 'undefined' : typeof CefSharp.BindObjectAsync) + '|' + typeof syncHost + '|' + (typeof syncHost === 'object' ? Object.keys(syncHost).join(',') : '') + '|' + location.origin");
+                var result = await Browser.EvaluateScriptAsync("(document.getElementById('status')?.textContent || '') + '|' + location.origin");
                 if (!_browserReady && result.Success) _ = Dispatcher.BeginInvoke(new Action(() => ConnectionText.Text = "Bridge diagnostics: " + result.Result));
             };
-            Browser.JavascriptObjectRepository.Register("syncHost", _boundBridge, isAsync: true, options: BindingOptions.DefaultBinder);
-            Browser.JavascriptObjectRepository.ObjectBoundInJavascript += (_, e) => _ = Dispatcher.BeginInvoke(new Action(() => ConnectionText.Text = "Bound in JavaScript: " + e.ObjectName));
-            _boundBridge.StatusChanged += (_, status) => _ = Dispatcher.BeginInvoke(new Action(() => ConnectionText.Text = status));
-            Browser.FrameLoadStart += (_, __) => _boundBridge.ClearCallback();
+            _module.ConfigureBrowser(Browser, status => _ = Dispatcher.BeginInvoke(new Action(() => ConnectionText.Text = status)));
 
             _engine.EnvelopeReady += Engine_OnEnvelopeReady;
             _engine.MetricsChanged += (_, __) => Dispatcher.BeginInvoke(new Action(UpdateMetrics));
@@ -71,51 +69,20 @@ namespace ThreeJsSync.Host
             _flushTimer.Tick += (_, __) => _engine.FlushPending();
             _flushTimer.Start();
 
-            Loaded += async (_, __) =>
-            {
-                var requested = Environment.GetCommandLineArgs().FirstOrDefault(a => a.StartsWith("--transport=", StringComparison.OrdinalIgnoreCase))?.Substring(12).ToLowerInvariant();
-                if (requested == "postmessage" || requested == "bound" || requested == "fetch")
-                {
-                    foreach (ComboBoxItem item in TransportSelector.Items) if (Equals(item.Tag, requested)) item.IsSelected = true;
-                }
-                _windowLoaded = true;
-                _metadataInitialized = true;
-                await SwitchTransportAsync(SelectedTransport());
-            };
+            Loaded += async (_, __) => await StartTransportAsync();
             Closed += OnClosed;
             UpdateMetrics();
         }
 
-        private async void TransportSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_windowLoaded) return;
-            await SwitchTransportAsync(SelectedTransport());
-        }
-
-        private string SelectedTransport() => (TransportSelector.SelectedItem as ComboBoxItem)?.Tag as string ?? "postmessage";
-
-        private async Task SwitchTransportAsync(string name)
+        private async Task StartTransportAsync()
         {
             _browserReady = false;
-            ConnectionText.Text = "Connecting via " + name + "…";
-            _transportCancellation.Cancel();
-            if (_transport != null)
-            {
-                _transport.MessageReceived -= Transport_OnMessageReceived;
-                try { await _transport.StopAsync(CancellationToken.None); } catch { }
-                _transport.Dispose();
-            }
-            _transportCancellation.Dispose();
-            _transportCancellation = new CancellationTokenSource();
-            switch (name)
-            {
-                case "bound": _transport = new BoundCallbackSyncTransport(Browser, _boundBridge); break;
-                case "fetch": _transport = new FetchSyncTransport(Browser, _requestHandler); break;
-                default: _transport = new PostMessageSyncTransport(Browser); break;
-            }
+            _metadataInitialized = true;
+            ConnectionText.Text = "Connecting via " + _module.Name + "…";
+            _transport = _module.CreateTransport(Browser, _requestHandler);
             _transport.MessageReceived += Transport_OnMessageReceived;
             await _transport.StartAsync(_transportCancellation.Token);
-            Browser.Load(LocalRequestHandler.Origin + "/index.html?transport=" + Uri.EscapeDataString(name));
+            Browser.Load(LocalRequestHandler.Origin + "/index.html?transport=" + Uri.EscapeDataString(_module.Name));
         }
 
         private void Transport_OnMessageReceived(object sender, TransportMessageEventArgs e)
@@ -236,7 +203,7 @@ namespace ThreeJsSync.Host
             _flushTimer.Stop();
             _transportCancellation.Cancel();
             if (_transport != null) { try { await _transport.StopAsync(CancellationToken.None); } catch { } _transport.Dispose(); }
-            _boundBridge.ClearCallback();
+            _module.Dispose();
             _engine.Dispose();
             Browser.Dispose();
             _transportCancellation.Dispose();

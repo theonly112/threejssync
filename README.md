@@ -1,6 +1,6 @@
 # ThreeJsSync
 
-A runnable WPF prototype for low-latency, two-way state synchronization between a three.js object in CefSharp and a .NET Framework host object. One application compares three transports while using the same state model, conflict rules, batching, and benchmark.
+A set of three runnable WPF prototypes for low-latency, two-way state synchronization between a three.js object in CefSharp and a .NET Framework host object. Each transport has a dedicated application while state handling, conflict rules, batching, UI, and benchmark infrastructure remain shared for a fair comparison.
 
 ## What is included
 
@@ -9,14 +9,14 @@ A runnable WPF prototype for low-latency, two-way state synchronization between 
 - Host and browser property editors plus three.js `TransformControls`
 - Field-level last-write-wins using Lamport stamps
 - Per-frame, property-keyed coalescing with no unbounded message queue
-- Full snapshot recovery after navigation or transport changes
-- Three transport implementations:
+- Full snapshot recovery after navigation
+- Three independently runnable applications:
 
-| Transport | Browser → host | Host → browser | Notes |
+| Application | Browser → host | Host → browser | Notes |
 | --- | --- | --- | --- |
-| `postmessage` | `CefSharp.PostMessage` | `ExecuteScriptAsync` | Recommended default: small API and lifecycle surface |
-| `bound` | Async bound method | Persistent `IJavascriptCallback` | Native IPC in both directions; callback must be replaced after navigation |
-| `fetch` | Intercepted same-origin `fetch` | `ExecuteScriptAsync` | Familiar web API, but pays request/response overhead |
+| `ThreeJsSync.PostMessage` | `CefSharp.PostMessage` | `ExecuteScriptAsync` | Recommended default: small API and lifecycle surface |
+| `ThreeJsSync.BoundCallback` | Async bound method | Persistent `IJavascriptCallback` | Native IPC in both directions; callback must be replaced after navigation |
+| `ThreeJsSync.Fetch` | Intercepted same-origin `fetch` | `ExecuteScriptAsync` | Familiar web API, but pays request/response overhead |
 
 No listener, local port, or external network access is used at runtime. The application intercepts the fixed origin `https://threejssync.local`, serves bundled assets, and handles the fetch endpoint inside CefSharp.
 
@@ -36,20 +36,19 @@ npm test
 cd ..
 dotnet test tests\ThreeJsSync.Core.Tests\ThreeJsSync.Core.Tests.csproj -c Debug
 dotnet build ThreeJsSync.sln -c Debug -p:Platform=x64
-.\src\ThreeJsSync.Host\bin\x64\Debug\net472\win-x64\ThreeJsSync.Host.exe
 ```
 
-The .NET host build runs the Vite production build and copies `web/dist` into the executable output. The application does not need Node.js or internet access after it is built.
+The shared host build runs the Vite production build. Each application copies `web/dist` into its own executable output and does not need Node.js or internet access after it is built.
 
-For an automated startup smoke test of a specific bridge, pass one of:
+Launch the approach you want to inspect:
 
 ```powershell
-ThreeJsSync.Host.exe --transport=postmessage
-ThreeJsSync.Host.exe --transport=bound
-ThreeJsSync.Host.exe --transport=fetch
+.\src\ThreeJsSync.PostMessage\bin\x64\Debug\net472\win-x64\ThreeJsSync.PostMessage.exe
+.\src\ThreeJsSync.BoundCallback\bin\x64\Debug\net472\win-x64\ThreeJsSync.BoundCallback.exe
+.\src\ThreeJsSync.Fetch\bin\x64\Debug\net472\win-x64\ThreeJsSync.Fetch.exe
 ```
 
-The selector in the application disposes the current bridge, reloads the browser, and initializes the selected bridge from a fresh host snapshot.
+There is no transport selector or runtime bridge switching. Each executable references the shared editor and synchronization engine but owns only its transport-specific CefSharp setup and bridge implementation. This keeps the approach-specific code easy to find and prevents callback or handler lifecycles from overlapping.
 
 ## Synchronization model
 
@@ -70,7 +69,7 @@ To add an application property, register matching `PropertyCodec` implementation
 
 ## Benchmark
 
-Click **Run 5 s warm-up + 30 s benchmark**. Both peers generate approximately 60 updates per second on different properties while correlated pings and patch acknowledgements measure round-trip time without clock synchronization. After a two-second drain, the result reports:
+In any of the three applications, click **Run 5 s warm-up + 30 s benchmark**. Both peers generate approximately 60 updates per second on different properties while correlated pings and patch acknowledgements measure round-trip time without clock synchronization. After a two-second drain, the result reports:
 
 - sent/received messages and changes
 - bytes and coalesced changes
@@ -85,7 +84,10 @@ During the final implementation smoke test, the PostMessage prototype completed 
 ## Project map
 
 - `src/ThreeJsSync.Core`: protocol, state model, validation, merge engine, metrics, and transport contract
-- `src/ThreeJsSync.Host`: WPF application, CefSharp bridges, local resource handling, and benchmark runner
+- `src/ThreeJsSync.Host`: shared WPF editor, synchronization orchestration, local resource handling, and benchmark runner
+- `src/ThreeJsSync.PostMessage`: dedicated PostMessage + script executable and bridge
+- `src/ThreeJsSync.BoundCallback`: dedicated bound-object + callback executable and bridge
+- `src/ThreeJsSync.Fetch`: dedicated intercepted-fetch + script executable and bridge
 - `web`: three.js editor, browser merge engine, transport adapters, and Vitest tests
 - `tests/ThreeJsSync.Core.Tests`: .NET merge/protocol tests
 - `protocol`: JSON schema and cross-language fixture

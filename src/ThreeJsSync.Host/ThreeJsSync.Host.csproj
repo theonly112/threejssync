@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
+    <AssemblyName>ThreeJsSync.Host.Shared</AssemblyName>
     <TargetFramework>net472</TargetFramework>
     <UseWPF>true</UseWPF>
     <LangVersion>7.3</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
     <Platforms>x64</Platforms>
     <Prefer32Bit>false</Prefer32Bit>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <ApplicationIcon />
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf" Version="149.0.60" />
@@ -18,9 +17,5 @@
   </ItemGroup>
   <Target Name="BuildWebAssets" BeforeTargets="BeforeBuild" Condition="'$(SkipWebBuild)' != 'true'">
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\..\web" Command="npm run build" />
-  </Target>
-  <Target Name="CopyWebAssets" AfterTargets="Build">
-    <ItemGroup><WebAssets Include="$(MSBuildProjectDirectory)\..\..\web\dist\**\*" /></ItemGroup>
-    <Copy SourceFiles="@(WebAssets)" DestinationFiles="@(WebAssets->'$(OutDir)Web\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 </Project>
